@@ -7,8 +7,8 @@ import { Address, Enrollment } from "@prisma/client";
 
 async function getAddressFromCEP(cep: string) {
   const result = await request.get(`https://viacep.com.br/ws/${cep}/json/`);
-
-  if (!result.data) {
+  
+  if (!result.data || result.data.erro) {
     throw notFoundError();
   }
   return result.data;
@@ -42,12 +42,10 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   const enrollment = exclude(params, "address");
   const address = getAddressForUpsert(params.address);
   
-  const isCepValid = await getAddressFromCEP(address.cep);
-  
-  if(!isCepValid) {
-    throw notFoundError();
-  }
-  return isCepValid;
+  console.log("[service] Chamando API para obter o endereco");
+  const fullAddress = await getAddressFromCEP(address.cep);
+  console.log("[service] Endereco retornado " + JSON.stringify(fullAddress));
+
   //TODO - Verificar se o CEP é válido
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, "userId"));
 
