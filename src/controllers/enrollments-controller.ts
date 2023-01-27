@@ -21,14 +21,10 @@ export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, re
       ...req.body,
       userId: req.userId,
     });
+
     return res.sendStatus(httpStatus.OK);
   } catch (error) {
-    console.log(`[controller] Erro no try/catch: ${error}`);
-    if (error.name == "NotFoundError") {
-      return res.sendStatus(httpStatus.NOT_FOUND);
-    } else {
-      return res.sendStatus(httpStatus.BAD_REQUEST);
-    }
+    return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 }
 
@@ -36,23 +32,11 @@ export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response
   const { cep } = req.query as Record<string, string>;
 
   try {
-    const fullAddress = await enrollmentsService.getAddressFromCEP(cep);
-    const address = {
-      logradouro: fullAddress.logradouro,
-      complemento: fullAddress.complemento,
-      bairro: fullAddress.bairro,
-      cidade: fullAddress.cidade,
-      uf: fullAddress.uf,
-    };
-    res.status(httpStatus.OK).send(address);
+    const address = await enrollmentsService.getAddressFromCEP(cep);
+    return res.status(httpStatus.OK).send(address);
   } catch (error) {
     if (error.name === "NotFoundError") {
-      res.sendStatus(httpStatus.NOT_FOUND);
-    } else {
-      res.sendStatus(httpStatus.NO_CONTENT);
+      return res.send(httpStatus.NO_CONTENT);
     }
   }
-
-  return;
 }
-
