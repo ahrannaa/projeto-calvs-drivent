@@ -139,7 +139,7 @@ describe("POST /payments/process", () => {
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketType();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
-
+     
       const body = { cardData: generateCreditCardData() };
 
       const response = await server.post("/payments/process").set("Authorization", `Bearer ${token}`).send(body);
